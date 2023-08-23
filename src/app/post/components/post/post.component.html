@@ -1,1 +1,17 @@
-<p>post works!</p>
+<div class="post-container">
+    <div class="user-name">User Name</div>
+    <div class="post-text">This is a sample post.</div>
+    <div class="timestamp">Posted 1 hour ago</div>
+
+    <div class="comment-icon" (click)="toggleCommentInput()">
+        <i class="fa fa-comment"></i> Comment
+      </div>
+      <app-comment *ngFor="let comment of comments" [comment]="comment"></app-comment>
+
+</div>
+
+
+
+
+
+  
