@@ -2,12 +2,10 @@
     <div class="user-name">User Name</div>
     <div class="post-text">This is a sample post.</div>
     <div class="timestamp">Posted 1 hour ago</div>
-
-    <div class="comment-icon" (click)="toggleCommentInput()">
+    <div class="comment-icon" (click)="commentComponent.toggleCommentInput()">
         <i class="fa fa-comment"></i> Comment
-      </div>
-      <app-comment *ngFor="let comment of comments" [comment]="comment"></app-comment>
-
+    </div>
+    <app-comment #commentComponent></app-comment> <!-- Reference to the comment component -->
 </div>
 
 

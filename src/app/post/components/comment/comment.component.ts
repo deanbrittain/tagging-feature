@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Comment } from '../../models/comment.model';
 
 @Component({
@@ -12,19 +12,22 @@ export class CommentComponent {
   newCommentText = '';
   comments: Comment[] = [];
 
+  @Output() commentIconClicked = new EventEmitter<void>();
+
   toggleCommentInput() {
     this.showCommentInput = !this.showCommentInput;
+    this.commentIconClicked.emit(); // Emit the event when the comment icon is clicked
   }
 
   addComment() {
     if (this.newCommentText.trim() !== '') {
       const newComment: Comment = {
-        userName: 'User Name', // Replace with actual user name if available
+        userName: 'User Name',
         text: this.newCommentText,
         timestamp: new Date(),
       };
       this.comments.push(newComment);
-      this.newCommentText = ''; // Clear the input field
+      this.newCommentText = '';
     }
   }
 }

@@ -1,11 +1,10 @@
 <div *ngIf="showCommentInput" class="comment-input-container">
     <textarea placeholder="Add a comment..." [(ngModel)]="newCommentText"></textarea>
     <button (click)="addComment()">Comment</button>
-  </div>
-  
-  <div *ngFor="let comment of comments" class="comment-container">
+</div>
+<div *ngFor="let comment of comments" class="comment-container">
     <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png?20170328184010" alt="Profile Picture" class="profile-picture">
     <div class="user-name">{{ comment.userName }}</div>
     <div class="comment-text">{{ comment.text }}</div>
     <div class="timestamp">{{ comment.timestamp | date:'short' }}</div>
-  </div>
+</div>
