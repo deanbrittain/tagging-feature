@@ -1,5 +1,8 @@
 <div *ngIf="showCommentInput" class="comment-input-container">
-    <textarea placeholder="Add a comment..." [(ngModel)]="newCommentText"></textarea>
+    <textarea placeholder="Add a comment..." [(ngModel)]="commentInputValue" (input)="onCommentInputChange($event)"></textarea>
+    <div *ngIf="filteredUsers.length > 0" class="user-suggestions">
+        <div *ngFor="let user of filteredUsers" (click)="selectUser(user)">{{ user.name }}</div>
+    </div>
     <button (click)="addComment()">Comment</button>
 </div>
 <div *ngFor="let comment of comments" class="comment-container">

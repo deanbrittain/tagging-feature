@@ -47,3 +47,22 @@
     margin-right: 10px;
   }
 }
+
+.user-suggestions {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+.user-suggestions div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.user-suggestions div:hover {
+  background-color: #f0f0f0;
+}
