@@ -48,6 +48,14 @@ export class CommentComponent {
     if (this.commentInputValue.includes('@')) {
       // Logic to handle '@' symbol detection
       console.log('Detected @ symbol');
+      const atIndex = this.commentInputValue.lastIndexOf('@');
+      const afterAt =
+        this.commentInputValue.slice(atIndex + 1).split(' ')[0] || '';
+      this.filteredUsers = this.users.filter((user) =>
+        user.name.startsWith(afterAt)
+      );
+    } else {
+      this.filteredUsers = []; // Clear the filtered users if '@' is removed
     }
   }
 
