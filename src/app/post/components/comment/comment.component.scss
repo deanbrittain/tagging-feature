@@ -6,23 +6,6 @@
   margin-top: 16px;
   border: 1px solid $secondary-color;
   background-color: #f5f8fa;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.tagged-name.new-tag.animate span {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(10px);
-  animation-name: reveal;
-  animation-duration: 0.3s;
-  animation-fill-mode: forwards;
-  background: linear-gradient(90deg, orange, yellow, orange);
-  background-clip: border-box;  // Standard property
-  -webkit-background-clip: text;  // WebKit-specific
-  color: transparent;
-  -webkit-text-fill-color: transparent;  // This is for Webkit browsers
-
 }
 
 .comment-container {
@@ -80,32 +63,4 @@
 
 .highlighted {
   background-color: #f0f0f0;
-}
-
-@keyframes reveal {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.comment-input {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  min-height: 40px;
-  line-height: 1.5;
-}
-
-.highlighted-tag {
-  background: linear-gradient(90deg, orange, yellow, orange);
-  background-clip: border-box;  // Standard property
-  -webkit-background-clip: text;  // WebKit-specific
-  color: transparent;
-  -webkit-text-fill-color: transparent;  // This is for Webkit browsers
 }
