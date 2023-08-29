@@ -6,6 +6,17 @@
   margin-top: 16px;
   border: 1px solid $secondary-color;
   background-color: #f5f8fa;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.tagged-name.new-tag.animate span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(10px);
+  animation-name: reveal;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
 }
 
 .comment-container {
@@ -65,15 +76,6 @@
   background-color: #f0f0f0;
 }
 
-.tagged-name span {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(10px);
-  animation-name: reveal;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-}
-
 @keyframes reveal {
   0% {
     opacity: 0;
@@ -93,4 +95,3 @@
   min-height: 40px;
   line-height: 1.5;
 }
-

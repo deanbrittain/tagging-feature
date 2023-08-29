@@ -55,20 +55,7 @@ export class CommentComponent {
     this.commentInputValue = this.commentInput.nativeElement.innerText;
     this.newCommentText = this.commentInputValue;
 
-    const lastSelectedUserIndex = this.commentInputValue.lastIndexOf(
-      this.lastSelectedUser
-    );
-    if (
-      lastSelectedUserIndex !== -1 &&
-      this.commentInputValue.indexOf(
-        '@',
-        lastSelectedUserIndex + this.lastSelectedUser.length
-      ) !== -1
-    ) {
-      this.lastSelectedUser = '';
-    }
-
-    if (this.commentInputValue.includes('@') && !this.lastSelectedUser) {
+    if (this.commentInputValue.includes('@')) {
       const atIndex = this.commentInputValue.lastIndexOf('@');
       const afterAt =
         this.commentInputValue.slice(atIndex + 1).split(' ')[0] || '';
@@ -101,9 +88,28 @@ export class CommentComponent {
           `<span style="animation-delay: ${index * 0.1}s">${char}</span>`
       )
       .join('');
-    this.commentInput.nativeElement.innerHTML = `${beforeAt}<span class='tagged-name new-tag'>${wrappedName}</span> ${afterAt}`;
 
-    // ... (rest of your code remains the same)
+    // Create a new span element for the tagged name
+    const newTag = document.createElement('span');
+    newTag.className = 'tagged-name new-tag animate';
+    newTag.innerHTML = wrappedName;
+
+    // Update the innerHTML and append the new tag
+    this.commentInput.nativeElement.innerHTML = `${beforeAt} ${afterAt}`;
+    this.commentInput.nativeElement.appendChild(newTag);
+
+    // Remove the 'new-tag' and 'animate' classes from all tags
+    this.commentInput.nativeElement
+      .querySelectorAll('.tagged-name')
+      .forEach((tag: HTMLElement) => {
+        tag.classList.remove('new-tag');
+        tag.classList.remove('animate');
+      });
+
+    // Add the 'new-tag' and 'animate' classes only to the newly added tag
+    newTag.classList.add('new-tag');
+    newTag.classList.add('animate');
+
     // Update the commentInputValue and newCommentText
     this.commentInputValue = this.commentInput.nativeElement.innerText;
     this.newCommentText = this.commentInputValue;
