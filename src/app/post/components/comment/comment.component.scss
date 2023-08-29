@@ -64,3 +64,33 @@
 .highlighted {
   background-color: #f0f0f0;
 }
+
+.tagged-name span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(10px);
+  animation-name: reveal;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comment-input {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 40px;
+  line-height: 1.5;
+}
+
