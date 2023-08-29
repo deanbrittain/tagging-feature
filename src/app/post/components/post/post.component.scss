@@ -1,39 +1,79 @@
+@import '/src/styles.scss';
+
 .post-container {
-    border: 1px solid #e1e4e8;
-    padding: 15px;
-    margin: 10px;
-    .user-name {
-      font-weight: bold;
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: auto;
+    background-color: #fff;
+    border: 1px solid $secondary-color;
+    transition: background-color 0.3s ease;
+  
+    &:hover {
+      background-color: #f5f8fa;
     }
-    .post-text {
-      margin: 10px 0;
-    }
-    .timestamp {
-      color: #6a737d;
-      font-size: 12px;
-    }
-  }
-  .comment-icon {
-    cursor: pointer;
-    color: #1da1f2;
   }
   
-
   .profile-container {
     display: flex;
-    align-items: center; // Vertically aligns the items
+    align-items: center;
   }
   
   .profile-picture {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    margin-right: 10px; // Adds some space between the picture and the username
   }
   
   .user-name {
+    margin-left: 16px;
     font-weight: bold;
+  }
+  
+  .post-text {
+    margin-top: 16px;
     font-size: 16px;
-    color: #1da1f2; // Twitter's blue color
+  }
+  
+  .timestamp {
+    margin-top: 8px;
+    color: #777;
+    font-size: 12px;
+  }
+  
+  .comment-icon {
+    margin-top: 16px;
+    cursor: pointer;
+    color: #1da1f2;
+    transition: color 0.3s ease;
+    &:hover {
+        color: darken($primary-color, 10%);
+      }
+  }
+
+  @media (max-width: 768px) {
+    .post-container,
+    .comment-container {
+      padding: 12px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .post-text,
+    .comment-text {
+      font-size: 18px;
+    }
+  }
+  
+  .user-name,
+  .comment-icon {
+    color: $primary-color;
+  }
+
+  .your-svg-class {
+    width: 24px;
+    height: 24px;
+    fill: #1da1f2;  // Change the color as you like
   }
   
