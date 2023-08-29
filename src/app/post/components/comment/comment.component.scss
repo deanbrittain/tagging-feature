@@ -48,21 +48,44 @@
   }
 }
 
-.user-suggestions {
-  position: absolute;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1;
+.comment-input-container {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border: 1px solid #e1e4e8;
+  textarea {
+    padding: 10px;
+    border: 1px solid #e1e4e8;
+    border-radius: 5px;
+    font-size: 15px;
+    resize: vertical;
+  }
+  button {
+    align-self: flex-end;
+    background-color: #1da1f2;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
 }
 
-.user-suggestions div {
-  padding: 10px;
-  cursor: pointer;
+.profile-container {
+  display: flex;
+  align-items: center; // Vertically aligns the items
 }
 
-.user-suggestions div:hover {
-  background-color: #f0f0f0;
+.profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-right: 10px; // Adds some space between the picture and the username
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 16px;
+  color: #1da1f2; // Twitter's blue color
 }

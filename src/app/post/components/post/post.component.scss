@@ -18,3 +18,22 @@
     color: #1da1f2;
   }
   
+
+  .profile-container {
+    display: flex;
+    align-items: center; // Vertically aligns the items
+  }
+  
+  .profile-picture {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 10px; // Adds some space between the picture and the username
+  }
+  
+  .user-name {
+    font-weight: bold;
+    font-size: 16px;
+    color: #1da1f2; // Twitter's blue color
+  }
+  
