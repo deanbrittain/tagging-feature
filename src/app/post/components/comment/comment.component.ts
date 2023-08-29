@@ -1,5 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
+
 import { CommentModel } from '../../models/comment.model';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-comment',
@@ -22,6 +31,10 @@ export class CommentComponent {
   // Array to hold the list of comments.
   comments: CommentModel[] = [];
 
+  highlightedIndex: number = -1;
+
+  lastSelectedUser: string = '';
+
   // Predefined list of users for the tagging feature.
   users = [
     { userID: 1, name: 'Kevin' },
@@ -32,6 +45,8 @@ export class CommentComponent {
 
   // Array to hold the filtered users based on the input after the "@" symbol.
   filteredUsers: any[] = [];
+
+  @ViewChild('commentInput', { static: false }) commentInput!: ElementRef;
 
   // Output event to notify the parent component when the comment icon is clicked.
   @Output() commentIconClicked = new EventEmitter<void>();
@@ -61,7 +76,27 @@ export class CommentComponent {
     this.commentInputValue = event.target.value;
     this.newCommentText = this.commentInputValue;
 
-    if (this.commentInputValue.includes('@')) {
+    // Reset lastSelectedUser if a new @ symbol is typed after the last selected user's name
+    const lastSelectedUserIndex = this.commentInputValue.lastIndexOf(
+      this.lastSelectedUser
+    );
+    if (
+      lastSelectedUserIndex !== -1 &&
+      this.commentInputValue.indexOf(
+        '@',
+        lastSelectedUserIndex + this.lastSelectedUser.length
+      ) !== -1
+    ) {
+      this.lastSelectedUser = '';
+    } else if (!this.commentInputValue.includes(this.lastSelectedUser)) {
+      this.lastSelectedUser = '';
+    }
+
+    if (!this.commentInputValue.includes(this.lastSelectedUser)) {
+      this.lastSelectedUser = '';
+    }
+
+    if (this.commentInputValue.includes('@') && !this.lastSelectedUser) {
       console.log('Detected @ symbol');
       const atIndex = this.commentInputValue.lastIndexOf('@');
       const afterAt =
@@ -72,6 +107,7 @@ export class CommentComponent {
     } else {
       this.filteredUsers = [];
     }
+    this.highlightedIndex = -1;
   }
 
   // Method to select a user from the filtered users list and update the comment input value.
@@ -82,6 +118,33 @@ export class CommentComponent {
 
     this.commentInputValue = `${beforeAt}@${user.name} ${afterAt}`;
     this.newCommentText = this.commentInputValue;
+
+    // This should hide the dropdown
     this.filteredUsers = [];
+    this.highlightedIndex = -1;
+    this.lastSelectedUser = `@${user.name}`;
+    this.commentInput.nativeElement.focus();
+  }
+
+  @HostListener('keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.filteredUsers.length > 0) {
+      if (event.key === 'ArrowDown') {
+        if (this.highlightedIndex < this.filteredUsers.length - 1) {
+          this.highlightedIndex++;
+        }
+      }
+      if (event.key === 'ArrowUp') {
+        if (this.highlightedIndex > 0) {
+          this.highlightedIndex--;
+        }
+      }
+      if (event.key === 'Enter') {
+        if (this.highlightedIndex >= 0) {
+          event.preventDefault();
+          this.selectUser(this.filteredUsers[this.highlightedIndex]);
+        }
+      }
+    }
   }
 }
