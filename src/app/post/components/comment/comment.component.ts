@@ -55,18 +55,27 @@ export class CommentComponent {
     this.commentInputValue = this.commentInput.nativeElement.innerText;
     this.newCommentText = this.commentInputValue;
 
-    if (this.commentInputValue.includes('@')) {
-      const atIndex = this.commentInputValue.lastIndexOf('@');
-      const afterAt =
-        this.commentInputValue.slice(atIndex + 1).split(' ')[0] || '';
-      const lowerCaseAfterAt = afterAt.toLowerCase();
+    let isTagging = false;
 
-      this.filteredUsers = this.users.filter((user) =>
-        user.name.toLowerCase().includes(lowerCaseAfterAt)
-      );
-    } else {
+    if (this.commentInputValue.includes('@')) {
+      const words = this.commentInputValue.split(' ');
+      const lastWord = words[words.length - 1];
+
+      if (lastWord.startsWith('@')) {
+        isTagging = true;
+        const afterAt = lastWord.slice(1);
+        const lowerCaseAfterAt = afterAt.toLowerCase();
+
+        this.filteredUsers = this.users.filter((user) =>
+          user.name.toLowerCase().includes(lowerCaseAfterAt)
+        );
+      }
+    }
+
+    if (!isTagging) {
       this.filteredUsers = [];
     }
+
     this.highlightedIndex = -1;
   }
 
@@ -92,7 +101,14 @@ export class CommentComponent {
     // Create a new span element for the tagged name
     const newTag = document.createElement('span');
     newTag.className = 'tagged-name new-tag animate';
-    newTag.innerHTML = wrappedName;
+
+    // Create a new span element for the highlighted tag
+    const highlightedTag = document.createElement('span');
+    highlightedTag.className = 'highlighted-tag';
+    highlightedTag.innerHTML = '@' + wrappedName;
+
+    // Append the highlighted tag to the new tag
+    newTag.appendChild(highlightedTag);
 
     // Update the innerHTML and append the new tag
     this.commentInput.nativeElement.innerHTML = `${beforeAt} ${afterAt}`;
@@ -117,7 +133,7 @@ export class CommentComponent {
     // Hide the dropdown and reset the highlighted index
     this.filteredUsers = [];
     this.highlightedIndex = -1;
-    this.lastSelectedUser = `@${user.name}`;
+    this.lastSelectedUser = `@${user.name}`; // Keep the "@" symbol here
 
     // Set the cursor at the end
     const range = document.createRange();
