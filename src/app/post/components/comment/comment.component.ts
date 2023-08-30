@@ -5,11 +5,12 @@ import {
   EventEmitter,
   ElementRef,
   ViewChild,
+  Renderer2,
+  HostListener,
 } from '@angular/core';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentModel } from '../../models/comment.model';
-import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-comment',
@@ -17,27 +18,18 @@ import { HostListener } from '@angular/core';
   styleUrls: ['./comment.component.scss'],
 })
 export class CommentComponent {
-  constructor(private snackBar: MatSnackBar) {}
-  // Input property to receive the comment data from the parent component.
+  constructor(private snackBar: MatSnackBar, private renderer: Renderer2) {}
+
   @Input() comment!: CommentModel;
+  @Output() commentIconClicked = new EventEmitter<void>();
 
-  // State variable to control the visibility of the comment input field.
   showCommentInput = false;
-
-  // State variable to hold the text of the new comment being added.
   newCommentText = '';
-
-  // State variable to hold the value of the comment input field.
   commentInputValue: string = '';
-
-  // Array to hold the list of comments.
   comments: CommentModel[] = [];
-
   highlightedIndex: number = -1;
-
   lastSelectedUser: string = '';
 
-  // Predefined list of users for the tagging feature.
   users = [
     { userID: 1, name: 'Kevin' },
     { userID: 2, name: 'Jeff' },
@@ -45,15 +37,10 @@ export class CommentComponent {
     { userID: 4, name: 'Gabbey' },
   ];
 
-  // Array to hold the filtered users based on the input after the "@" symbol.
   filteredUsers: any[] = [];
 
   @ViewChild('commentInput', { static: false }) commentInput!: ElementRef;
 
-  // Output event to notify the parent component when the comment icon is clicked.
-  @Output() commentIconClicked = new EventEmitter<void>();
-
-  // Method to toggle the visibility of the comment input field.
   toggleCommentInput() {
     this.showCommentInput = !this.showCommentInput;
     this.commentIconClicked.emit();
@@ -64,7 +51,7 @@ export class CommentComponent {
     if (this.newCommentText.trim() !== '') {
       const newComment: CommentModel = {
         userName: 'User Name',
-        text: this.newCommentText,
+        text: this.newCommentText.trim(),
         timestamp: new Date(),
       };
       this.comments.push(newComment);
@@ -94,34 +81,55 @@ export class CommentComponent {
   // Method to handle changes in the comment input field.
   // It detects the "@" symbol and filters the users accordingly.
   onCommentInputChange(event: any) {
-    this.commentInputValue = event.target.value;
-    this.newCommentText = this.commentInputValue;
+    let content = this.commentInput.nativeElement.textContent.trim();
+    this.commentInputValue = content;
+    this.newCommentText = content;
+
+    // Identify tagged names
+    const taggedNames = content.match(/@\w+/g) || [];
+
+    // Replace tagged names with stylized versions
+    let styledContent = content;
+    taggedNames.forEach((tag: string) => {
+      styledContent = styledContent.replace(
+        new RegExp(tag, 'g'),
+        `<span class='tagged'>${tag}</span>`
+      );
+    });
+
+    // Update the innerHTML only if there are tagged names
+    if (taggedNames.length > 0) {
+      this.commentInput.nativeElement.innerHTML = styledContent;
+    }
+
+    // Place the cursor at the end
+    const range = document.createRange();
+    const sel = window.getSelection();
+    if (sel) {
+      range.selectNodeContents(this.commentInput.nativeElement);
+      range.collapse(false); // Collapse to end
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
 
     // Reset lastSelectedUser if a new @ symbol is typed after the last selected user's name
-    const lastSelectedUserIndex = this.commentInputValue.lastIndexOf(
-      this.lastSelectedUser
-    );
+    const lastSelectedUserIndex = content.lastIndexOf(this.lastSelectedUser);
     if (
       lastSelectedUserIndex !== -1 &&
-      this.commentInputValue.indexOf(
+      content.indexOf(
         '@',
         lastSelectedUserIndex + this.lastSelectedUser.length
       ) !== -1
     ) {
       this.lastSelectedUser = '';
-    } else if (!this.commentInputValue.includes(this.lastSelectedUser)) {
+    } else if (!content.includes(this.lastSelectedUser)) {
       this.lastSelectedUser = '';
     }
 
-    if (!this.commentInputValue.includes(this.lastSelectedUser)) {
-      this.lastSelectedUser = '';
-    }
-
-    if (this.commentInputValue.includes('@') && !this.lastSelectedUser) {
+    if (content.includes('@') && !this.lastSelectedUser) {
       console.log('Detected @ symbol');
-      const atIndex = this.commentInputValue.lastIndexOf('@');
-      const afterAt =
-        this.commentInputValue.slice(atIndex + 1).split(' ')[0] || '';
+      const atIndex = content.lastIndexOf('@');
+      const afterAt = content.slice(atIndex + 1).split(' ')[0] || '';
       this.filteredUsers = this.users.filter((user) =>
         user.name.startsWith(afterAt)
       );
@@ -133,12 +141,28 @@ export class CommentComponent {
 
   // Method to select a user from the filtered users list and update the comment input value.
   selectUser(user: any) {
-    const atIndex = this.commentInputValue.lastIndexOf('@');
-    const beforeAt = this.commentInputValue.slice(0, atIndex);
-    const afterAt = this.commentInputValue.slice(atIndex).split(' ')[1] || '';
+    let content = this.commentInput.nativeElement.textContent; // Use textContent
+    content = content.trim(); // Explicitly trim the text
+    const atIndex = content.lastIndexOf('@');
+    const beforeAt = content.slice(0, atIndex);
+    const afterAt = content.slice(atIndex).split(' ')[1] || '';
 
-    this.commentInputValue = `${beforeAt}@${user.name} ${afterAt}`;
-    this.newCommentText = this.commentInputValue;
+    const newContent = `${beforeAt}<span class='tagged'>@${user.name}</span>&nbsp;${afterAt}`;
+    this.commentInput.nativeElement.innerHTML = newContent.trim(); // Trim here too
+    this.newCommentText = newContent.trim(); // Trim here too
+
+    const textNode = this.renderer.createText(' '); // This is a space
+    this.renderer.appendChild(this.commentInput.nativeElement, textNode);
+
+    // Update the cursor position to be after the new text node
+    const range = document.createRange();
+    const sel = window.getSelection();
+    if (sel) {
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
 
     // This should hide the dropdown
     this.filteredUsers = [];
