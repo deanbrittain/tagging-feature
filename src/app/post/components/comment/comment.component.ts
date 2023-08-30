@@ -7,6 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentModel } from '../../models/comment.model';
 import { HostListener } from '@angular/core';
 
@@ -16,6 +17,7 @@ import { HostListener } from '@angular/core';
   styleUrls: ['./comment.component.scss'],
 })
 export class CommentComponent {
+  constructor(private snackBar: MatSnackBar) {}
   // Input property to receive the comment data from the parent component.
   @Input() comment!: CommentModel;
 
@@ -67,6 +69,25 @@ export class CommentComponent {
       };
       this.comments.push(newComment);
       this.commentInputValue = '';
+
+      // Extract tagged usernames
+      const taggedUsers = this.newCommentText.match(/@\w+/g);
+      if (taggedUsers) {
+        const userNames = taggedUsers.map((user) => user.slice(1)); // Remove '@'
+        let toastMessage = '';
+        if (userNames.length === 1) {
+          toastMessage = `${userNames[0]} has been notified`;
+        } else {
+          const lastUser = userNames.pop();
+          toastMessage = `${userNames.join(
+            ', '
+          )} and ${lastUser} have been notified`;
+        }
+        // Display the toast (replace this with your actual toast logic)
+        this.snackBar.open(toastMessage, 'Close', {
+          duration: 3000,
+        });
+      }
     }
   }
 
