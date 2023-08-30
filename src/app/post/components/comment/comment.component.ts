@@ -78,41 +78,49 @@ export class CommentComponent {
     }
   }
 
-  // Method to handle changes in the comment input field.
-  // It detects the "@" symbol and filters the users accordingly.
   onCommentInputChange(event: any) {
-    let content = this.commentInput.nativeElement.textContent.trim();
-    this.commentInputValue = content;
-    this.newCommentText = content;
+    // Get the text content from the contenteditable element
+    let content = this.commentInput.nativeElement.textContent;
 
-    // Identify tagged names
+    // Update the component's state variables with the new content
+    this.commentInputValue = content;
+    this.newCommentText = content; //*** WHY ARE WE CAPTURING THIS TWICE? */
+
+    // Use regex to find all instances of tagged names (e.g., @John)
     const taggedNames = content.match(/@\w+/g) || [];
 
-    // Replace tagged names with stylized versions
+    // Initialize a variable to hold the styled content
     let styledContent = content;
+
+    // Loop through each tagged name and replace it with a styled version *** THIS ISN'T WORKING, TEST THIS ***
     taggedNames.forEach((tag: string) => {
       styledContent = styledContent.replace(
         new RegExp(tag, 'g'),
-        `<span class='tagged'>${tag}</span>`
+        `<span class='tagged' style="color:red">${tag}</span>`
       );
     });
 
     // Update the innerHTML only if there are tagged names
     if (taggedNames.length > 0) {
-      this.commentInput.nativeElement.innerHTML = styledContent;
+      this.commentInput.nativeElement.innerHTML = styledContent; // WHAT IS THIS LINE DOING EXACTLY?
     }
 
-    // Place the cursor at the end
+    // Create a new range object to manipulate the cursor position
     const range = document.createRange();
+
+    // Get the current selection object
     const sel = window.getSelection();
+
+    // Check if a selection object exists
     if (sel) {
+      // Set the cursor position to the end of the content
       range.selectNodeContents(this.commentInput.nativeElement);
-      range.collapse(false); // Collapse to end
+      range.collapse(false);
       sel.removeAllRanges();
       sel.addRange(range);
     }
 
-    // Reset lastSelectedUser if a new @ symbol is typed after the last selected user's name
+    // Check if the last selected user is still in the content
     const lastSelectedUserIndex = content.lastIndexOf(this.lastSelectedUser);
     if (
       lastSelectedUserIndex !== -1 &&
@@ -121,21 +129,29 @@ export class CommentComponent {
         lastSelectedUserIndex + this.lastSelectedUser.length
       ) !== -1
     ) {
+      // Reset the last selected user if a new '@' is typed
       this.lastSelectedUser = '';
     } else if (!content.includes(this.lastSelectedUser)) {
+      // Reset the last selected user if it's no longer in the content
       this.lastSelectedUser = '';
     }
 
+    // Detect if a new '@' symbol is typed
     if (content.includes('@') && !this.lastSelectedUser) {
       console.log('Detected @ symbol');
       const atIndex = content.lastIndexOf('@');
       const afterAt = content.slice(atIndex + 1).split(' ')[0] || '';
+
+      // Filter the list of users based on the text after the '@'
       this.filteredUsers = this.users.filter((user) =>
         user.name.startsWith(afterAt)
       );
     } else {
+      // Reset the filtered users list if no '@' is detected
       this.filteredUsers = [];
     }
+
+    // Reset the highlighted index for the dropdown
     this.highlightedIndex = -1;
   }
 
@@ -147,7 +163,7 @@ export class CommentComponent {
     const beforeAt = content.slice(0, atIndex);
     const afterAt = content.slice(atIndex).split(' ')[1] || '';
 
-    const newContent = `${beforeAt}<span class='tagged'>@${user.name}</span>&nbsp;${afterAt}`;
+    const newContent = `${beforeAt}<span class='tagged' style="color: red">@${user.name}</span>&nbsp;${afterAt}`;
     this.commentInput.nativeElement.innerHTML = newContent.trim(); // Trim here too
     this.newCommentText = newContent.trim(); // Trim here too
 
