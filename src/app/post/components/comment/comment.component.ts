@@ -60,20 +60,29 @@ export class CommentComponent {
       // Extract tagged usernames
       const taggedUsers = this.newCommentText.match(/@\w+/g);
       if (taggedUsers) {
-        const userNames = taggedUsers.map((user) => user.slice(1)); // Remove '@'
-        let toastMessage = '';
-        if (userNames.length === 1) {
-          toastMessage = `${userNames[0]} has been notified`;
-        } else {
-          const lastUser = userNames.pop();
-          toastMessage = `${userNames.join(
-            ', '
-          )} and ${lastUser} have been notified`;
+        // Filter only valid users
+        const validUserNames = this.users.map((user) => user.name);
+        const filteredTaggedUsers = taggedUsers.filter((tag) =>
+          validUserNames.includes(tag.slice(1))
+        );
+
+        // Create toast message only if there are valid users
+        if (filteredTaggedUsers.length > 0) {
+          const userNames = filteredTaggedUsers.map((user) => user.slice(1)); // Remove '@'
+          let toastMessage = '';
+          if (userNames.length === 1) {
+            toastMessage = `${userNames[0]} has been notified`;
+          } else {
+            const lastUser = userNames.pop();
+            toastMessage = `${userNames.join(
+              ', '
+            )} and ${lastUser} have been notified`;
+          }
+          // Display the toast (replace this with your actual toast logic)
+          this.snackBar.open(toastMessage, 'Close', {
+            duration: 3000,
+          });
         }
-        // Display the toast (replace this with your actual toast logic)
-        this.snackBar.open(toastMessage, 'Close', {
-          duration: 3000,
-        });
       }
     }
   }
@@ -92,12 +101,19 @@ export class CommentComponent {
     // Initialize a variable to hold the styled content
     let styledContent = content;
 
-    // Loop through each tagged name and replace it with a styled version *** THIS ISN'T WORKING, TEST THIS ***
+    const validUsers = this.users.map((user) => user.name);
+
     taggedNames.forEach((tag: string) => {
-      styledContent = styledContent.replace(
-        new RegExp(tag, 'g'),
-        `<span class='tagged' style="color:red">${tag}</span>`
-      );
+      // Remove the '@' symbol from the tag for checking
+      const tagName = tag.replace('@', '');
+
+      // Check if the tag is a valid user
+      if (validUsers.includes(tagName)) {
+        styledContent = styledContent.replace(
+          new RegExp(tag, 'g'),
+          `<span class='tagged' style="color:red">${tag}</span>`
+        );
+      }
     });
 
     // Update the innerHTML only if there are tagged names
@@ -163,7 +179,7 @@ export class CommentComponent {
     const beforeAt = content.slice(0, atIndex);
     const afterAt = content.slice(atIndex).split(' ')[1] || '';
 
-    const newContent = `${beforeAt}<span class='tagged' style="color: red">@${user.name}</span>&nbsp;${afterAt}`;
+    const newContent = `${beforeAt}@${user.name}${afterAt}`;
     this.commentInput.nativeElement.innerHTML = newContent.trim(); // Trim here too
     this.newCommentText = newContent.trim(); // Trim here too
 
