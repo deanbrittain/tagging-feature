@@ -1,63 +1,75 @@
+// Import necessary Angular and Material modules
 import {
   Component,
   Output,
   EventEmitter,
   ElementRef,
-  ViewChild, // What is this doing? Why is it needed?
+  ViewChild,
   Renderer2,
 } from '@angular/core';
-
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentModel } from '../../models/comment.model';
 import { HostListener } from '@angular/core';
 
+// Define User interface
 interface User {
   userID: number;
   name: string;
 }
 
+// Component metadata
 @Component({
   selector: 'app-comment',
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
 })
 export class CommentComponent {
+  // Constructor with injected dependencies
   constructor(private snackBar: MatSnackBar, private renderer: Renderer2) {}
 
+  // Output event to communicate with parent component
   @Output() commentIconClicked = new EventEmitter<void>();
 
+  // Component state
   showCommentInput = false;
   newCommentText: string = '';
   comments: CommentModel[] = [];
   highlightedIndex = -1;
-  lastSelectedUser = '';
+  lastSelectedUser = ''; // Last selected username for tagging
+  taggedUsers: { name: string; id: number }[] = []; // Users who are tagged
 
+  // Mock data for users
   users: User[] = [
     { userID: 1, name: 'Kevin' },
     { userID: 2, name: 'Jeff' },
-    { userID: 3, name: 'Bryan' },
-    { userID: 4, name: 'Gabbey' },
+    { userID: 3, name: 'Jeff' },
+    { userID: 4, name: 'Bryan' },
+    { userID: 5, name: 'Gabbey' },
   ];
 
+  // Filtered users based on input
   filteredUsers: User[] = [];
 
+  // Reference to the comment input element in the template
   @ViewChild('commentInput', { static: false }) commentInput!: ElementRef;
 
+  // Toggle comment input visibility
   toggleCommentInput() {
     this.showCommentInput = !this.showCommentInput;
     this.commentIconClicked.emit();
   }
 
+  // Add a new comment
   addComment() {
     const trimmedText = this.newCommentText.trim();
     if (trimmedText !== '') {
       this.createNewComment(trimmedText);
-      this.notifyTaggedUsers(trimmedText);
-      // Reset the comment input field
+      this.notifyTaggedUsers();
       this.commentInput.nativeElement.innerHTML = '';
     }
   }
 
+  // Create a new comment object and add it to the comments array
   createNewComment(text: string) {
     const newComment: CommentModel = {
       userName: 'User Name',
@@ -67,47 +79,34 @@ export class CommentComponent {
     this.comments.push(newComment);
   }
 
-  notifyTaggedUsers(text: string) {
-    const taggedUsers = this.extractTaggedUsers(text) as string[];
-    const validUserNames = this.filterValidUsers(taggedUsers);
+  // Notify tagged users with a snackbar
+  notifyTaggedUsers() {
+    // Extract unique user IDs
+    const uniqueValidUserIDs = [
+      ...new Set(this.taggedUsers.map((user) => user.id)),
+    ];
 
-    // Map valid usernames to their corresponding user IDs
-    const validUserIDs = validUserNames
-      .map((name) => {
-        const user = this.users.find((user) => user.name === name);
-        return user ? user.userID : null;
-      })
-      .filter(Boolean); // Remove any null values
-
-    // Remove duplicate user IDs
-    const uniqueValidUserIDs = [...new Set(validUserIDs)];
-
+    // Find usernames for these unique IDs
     const uniqueValidUserNames = uniqueValidUserIDs
       .map((id) => {
         const user = this.users.find((user) => user.userID === id);
         return user ? user.name : null;
       })
-      .filter(Boolean) as string[]; // Type assertion here
+      .filter(Boolean) as string[];
 
+    // Show notification if there are tagged users
     if (uniqueValidUserNames.length > 0) {
       const toastMessage = this.generateToastMessage(uniqueValidUserNames);
       this.snackBar.open(toastMessage, 'Close', {
         duration: 3000,
       });
     }
+
+    // Clear tagged users for the next comment
+    this.taggedUsers = [];
   }
 
-  extractTaggedUsers(text: string): string[] {
-    return text.match(/@\w+/g) || [];
-  }
-
-  filterValidUsers(taggedUsers: string[]): string[] {
-    const validUserNames = this.users.map((user) => user.name);
-    return taggedUsers
-      .filter((tag) => validUserNames.includes(tag.slice(1)))
-      .map((user) => user.slice(1));
-  }
-
+  // Generate the message for the snackbar
   generateToastMessage(userNames: string[]): string {
     let message = '';
     if (userNames.length === 1) {
@@ -119,14 +118,18 @@ export class CommentComponent {
     return message;
   }
 
-  onCommentInputChange(event: Event) {
+  // Event handler for comment input changes
+  onCommentInputChange() {
+    // Extract content from the input
     const content = this.commentInput.nativeElement.textContent;
+    // Update the comment text
     this.updateNewCommentText(content);
+    // Style any tagged usernames
     this.styleTaggedNames(content);
+    // Update cursor position
     this.setCursorPosition();
+    // Check for user tagging
     this.detectUserTagging(content);
-    // You can now use the event object if needed
-    console.log(event); // For demonstration; you might want to remove this in production
   }
 
   updateNewCommentText(content: string) {
@@ -136,7 +139,6 @@ export class CommentComponent {
   styleTaggedNames(content: string) {
     const taggedNames = this.extractTaggedNames(content);
     const styledContent = this.applyStylesToTags(content, taggedNames);
-
     const cursorPos = this.captureCursorPosition();
 
     this.updateCommentInput(styledContent, taggedNames.length > 0);
@@ -253,24 +255,26 @@ export class CommentComponent {
     );
   }
 
-  // Method to select a user from the filtered users list and update the comment input value.
   selectUser(user: any) {
     let content = this.getCommentInputText();
     const newContent = this.buildNewContent(content, user);
+    this.taggedUsers.push({ name: user.name, id: user.userID });
 
     this.updateCommentInputAndState(newContent);
+
+    this.updateNewCommentText(newContent);
+    this.styleTaggedNames(newContent);
+    this.setCursorPosition();
 
     this.addSpaceAfterContent();
 
     this.resetUserDropdown();
   }
 
-  // Extracts the text content from the comment input
   getCommentInputText(): string {
     return this.commentInput.nativeElement.textContent.trim();
   }
 
-  // Builds the new comment content based on the selected user
   buildNewContent(content: string, user: any): string {
     const atIndex = content.lastIndexOf('@');
     const beforeAt = content.slice(0, atIndex);
@@ -279,15 +283,13 @@ export class CommentComponent {
     return `${beforeAt}@${user.name}${afterAt}`.trim();
   }
 
-  // Updates the inner HTML of the comment input and component state
   updateCommentInputAndState(newContent: string) {
     this.commentInput.nativeElement.innerHTML = newContent;
     this.newCommentText = newContent;
   }
 
-  // Adds a space after the newly inserted username and updates the cursor position
   addSpaceAfterContent() {
-    const textNode = this.renderer.createText(' '); // This is a space
+    const textNode = this.renderer.createText(' ');
     this.renderer.appendChild(this.commentInput.nativeElement, textNode);
 
     const range = document.createRange();
@@ -300,7 +302,6 @@ export class CommentComponent {
     }
   }
 
-  // Resets the user dropdown and other related states
   resetUserDropdown() {
     this.filteredUsers = [];
     this.highlightedIndex = -1;

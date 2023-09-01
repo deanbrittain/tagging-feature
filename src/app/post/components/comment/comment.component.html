@@ -1,5 +1,5 @@
 <div *ngIf="showCommentInput" class="comment-input-container">
-    <div #commentInput contenteditable="true" placeholder="Add a comment..." (input)="onCommentInputChange($event)"></div>
+    <div #commentInput contenteditable="true" placeholder="Add a comment..." (input)="onCommentInputChange()"></div>
 
     <div *ngFor="let user of filteredUsers; let i = index"
     [class.highlighted]="i === highlightedIndex"
