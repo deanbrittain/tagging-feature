@@ -2,9 +2,10 @@
     <div #commentInput contenteditable="true" placeholder="Add a comment..." (input)="onCommentInputChange($event)"></div>
 
     <div *ngFor="let user of filteredUsers; let i = index"
-     [class.highlighted]="i === highlightedIndex"
-     (click)="selectUser(user)">
-  {{ user.name }}
+    [class.highlighted]="i === highlightedIndex"
+    (click)="selectUser(user)"
+   >
+ {{ user.name }}
 </div>
     <button (click)="addComment()">Comment</button>
 </div>
